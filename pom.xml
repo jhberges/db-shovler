@@ -4,4 +4,21 @@
   <artifactId>db-shovler</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>db-shovler</name>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.apache.geronimo.specs</groupId>
+  		<artifactId>geronimo-jms_1.1_spec</artifactId>
+  		<version>1.1.1</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.slf4j</groupId>
+  		<artifactId>slf4j-api</artifactId>
+  		<version>1.7.2</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>ch.qos.logback</groupId>
+  		<artifactId>logback-classic</artifactId>
+  		<version>1.0.9</version>
+  	</dependency>
+  </dependencies>
 </project>
