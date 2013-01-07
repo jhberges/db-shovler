@@ -16,7 +16,9 @@ public class ShovlerBean {
 	private Session session;
 	private Destination destination;
 	private MessageConsumer consumer;
+	private InserterBean inserterBean;
 	private final long maxBatchSize = DEFAULT_BATCH_SIZE;
+	private final boolean running = true;
 	public void process() {
 		while(running) {
 			try {
@@ -43,5 +45,49 @@ public class ShovlerBean {
 		session = connection.createSession(true, Session.CLIENT_ACKNOWLEDGE);
 		consumer = session.createConsumer(destination);
 		connection.start();
+	}
+
+	public ConnectionFactory getConnectionFactory() {
+		return connectionFactory;
+	}
+
+	public void setConnectionFactory(ConnectionFactory connectionFactory) {
+		this.connectionFactory = connectionFactory;
+	}
+
+	public String getJmsPassword() {
+		return jmsPassword;
+	}
+
+	public void setJmsPassword(String jmsPassword) {
+		this.jmsPassword = jmsPassword;
+	}
+
+	public String getJmsUsername() {
+		return jmsUsername;
+	}
+
+	public void setJmsUsername(String jmsUsername) {
+		this.jmsUsername = jmsUsername;
+	}
+
+	public Destination getDestination() {
+		return destination;
+	}
+
+	public void setDestination(Destination destination) {
+		this.destination = destination;
+	}
+
+	public long getMaxBatchSize() {
+		return maxBatchSize;
+	}
+
+	public InserterBean getInserterBean() {
+		return inserterBean;
+	}
+
+	public void setInserterBean(InserterBean inserterBean) {
+		this.inserterBean = inserterBean;
 	}
 }
