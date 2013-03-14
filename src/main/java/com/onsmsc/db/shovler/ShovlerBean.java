@@ -126,4 +126,13 @@ public class ShovlerBean {
 	public void setDeadLetterQueue(final String deadLetterQueue) {
 		this.deadLetterQueue = deadLetterQueue;
 	}
+
+	public PreparedStatementBatchStepMessageConverter getBatchStepMessageConverter() {
+		return batchStepMessageConverter;
+	}
+
+	public void setBatchStepMessageConverter(
+			final PreparedStatementBatchStepMessageConverter batchStepMessageConverter) {
+		this.batchStepMessageConverter = batchStepMessageConverter;
+	}
 }
