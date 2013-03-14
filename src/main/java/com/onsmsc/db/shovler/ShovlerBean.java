@@ -1,28 +1,31 @@
 package com.onsmsc.db.shovler;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
+import javax.jms.Message;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jms.core.JmsTemplate;
 
 public class ShovlerBean {
 	private static final long DEFAULT_BATCH_SIZE = 200;
-	private ConnectionFactory connectionFactory;
-	private Connection connection;
-	private String jmsPassword;
-	private String jmsUsername;
-	private Session session;
-	private Destination destination;
-	private MessageConsumer consumer;
-	private InserterBean inserterBean;
+	private static final long DEFAULT_RECEIVE_TIMEOUT = 200;
+	private static final Logger logger = LoggerFactory.getLogger(ShovlerBean.class);
+	private String destination;
+	private JmsTemplate jmsTemplate;
+	private JdbcTemplate jdbcTemplate;
+	private PreparedStatementBatchStepMessageConverter batchStepMessageConverter;
 	private final long maxBatchSize = DEFAULT_BATCH_SIZE;
 	private final boolean running = true;
+	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
+	private String deadLetterQueue;
 	public void process() {
 		while(running) {
 			try {
-				ensureInitialized();
 				processInLoop();
 			} catch (JMSException jmsException) {
 				pauseOnException(jmsException);
@@ -30,52 +33,56 @@ public class ShovlerBean {
 		}
 	}
 
-	private void processInLoop() {
-		// TODO Auto-generated method stub
-
+	private void processInLoop() throws JMSException {
+		jmsTemplate.setReceiveTimeout(receiveTimeout);
+		List<Message> receivedMessages = new ArrayList<Message>();
+		List<Object[]> batchArgs = new ArrayList<Object[]>();
+		boolean timedOut = false;
+		while (receivedMessages.size() < maxBatchSize && !timedOut) {
+			Message message = jmsTemplate.receive(destination);
+			if (null != message) {
+				receivedMessages.add(message);
+				batchArgs.add(batchStepMessageConverter.toPreparedStatementArgs(message));
+			} else {
+				timedOut = true;
+			}
+		}
+		
+		int[] updated = jdbcTemplate.batchUpdate(batchStepMessageConverter.getSql(), batchArgs);
+		for (int i = 0; i < updated.length; i++) {
+			if (1 == updated[i]) {
+				receivedMessages.get(i).acknowledge();
+			} else {
+				handleDidNotUpdateDatabase(receivedMessages.get(i));
+			}
+		}
 	}
 
-	private void pauseOnException(JMSException jmsException) {
-		// TODO Auto-generated method stub
-
+	private void handleDidNotUpdateDatabase(final Message message) throws JMSException {
+		logger.warn("Failed to update database for message: {}", message);
+		message.acknowledge();
+		if (null != deadLetterQueue) {
+			jmsTemplate.convertAndSend(deadLetterQueue, message);
+			logger.info("Put on DLQ: {}", deadLetterQueue);
+		} else {
+			logger.warn("Message dropped");
+		}
 	}
 
-	private void ensureInitialized() throws JMSException {
-		connection = connectionFactory.createConnection(jmsUsername, jmsPassword);
-		session = connection.createSession(true, Session.CLIENT_ACKNOWLEDGE);
-		consumer = session.createConsumer(destination);
-		connection.start();
+	private void pauseOnException(final JMSException jmsException) {
+		logger.warn("Exception when processing -- will pause a bit: " + jmsException.getMessage());
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			
+		}
 	}
 
-	public ConnectionFactory getConnectionFactory() {
-		return connectionFactory;
-	}
-
-	public void setConnectionFactory(ConnectionFactory connectionFactory) {
-		this.connectionFactory = connectionFactory;
-	}
-
-	public String getJmsPassword() {
-		return jmsPassword;
-	}
-
-	public void setJmsPassword(String jmsPassword) {
-		this.jmsPassword = jmsPassword;
-	}
-
-	public String getJmsUsername() {
-		return jmsUsername;
-	}
-
-	public void setJmsUsername(String jmsUsername) {
-		this.jmsUsername = jmsUsername;
-	}
-
-	public Destination getDestination() {
+	public String getDestination() {
 		return destination;
 	}
-
-	public void setDestination(Destination destination) {
+	
+	public void setDestination(final String destination) {
 		this.destination = destination;
 	}
 
@@ -83,11 +90,40 @@ public class ShovlerBean {
 		return maxBatchSize;
 	}
 
-	public InserterBean getInserterBean() {
-		return inserterBean;
+
+	public JmsTemplate getJmsTemplate() {
+		return jmsTemplate;
 	}
 
-	public void setInserterBean(InserterBean inserterBean) {
-		this.inserterBean = inserterBean;
+	public void setJmsTemplate(final JmsTemplate jmsTemplate) {
+		this.jmsTemplate = jmsTemplate;
+	}
+
+	public boolean isRunning() {
+		return running;
+	}
+
+	public long getReceiveTimeout() {
+		return receiveTimeout;
+	}
+
+	public void setReceiveTimeout(final long receiveTimeout) {
+		this.receiveTimeout = receiveTimeout;
+	}
+
+	public JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
+	}
+
+	public void setJdbcTemplate(final JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
+	public String getDeadLetterQueue() {
+		return deadLetterQueue;
+	}
+
+	public void setDeadLetterQueue(final String deadLetterQueue) {
+		this.deadLetterQueue = deadLetterQueue;
 	}
 }
