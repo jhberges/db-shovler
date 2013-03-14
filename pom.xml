@@ -59,4 +59,15 @@
 			<version>${spring.version}</version>
 		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>repo</id>
+			<url>https://github.com/jhberges/jhberges-mvn-repo/raw/master/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshot-repo</id>
+			<url>https://github.com/jhberges/jhberges-mvn-repo/raw/master/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 </project>
