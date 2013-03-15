@@ -2,16 +2,18 @@ package com.onsmsc.db.shovler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.Lifecycle;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jms.core.JmsTemplate;
 
-public class ShovlerBean {
+public class ShovlerBean implements Lifecycle, Runnable {
 	private static final long DEFAULT_BATCH_SIZE = 200;
 	private static final long DEFAULT_RECEIVE_TIMEOUT = 200;
 	private static final Logger logger = LoggerFactory.getLogger(ShovlerBean.class);
@@ -21,11 +23,12 @@ public class ShovlerBean {
 	private JdbcTemplate jdbcTemplate;
 	private PreparedStatementBatchStepMessageConverter batchStepMessageConverter;
 	private final long maxBatchSize = DEFAULT_BATCH_SIZE;
-	private final boolean running = true;
+	private boolean running = false;
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 	private String deadLetterQueue;
 	private long pauseOnExceptionWait = DEFAULT_PAUSE_ON_EXCEPTION;
-	public void process() {
+	@Override
+	public void run() {
 		while(running) {
 			try {
 				processInLoop();
@@ -101,6 +104,7 @@ public class ShovlerBean {
 		this.jmsTemplate = jmsTemplate;
 	}
 
+	@Override
 	public boolean isRunning() {
 		return running;
 	}
@@ -141,5 +145,20 @@ public class ShovlerBean {
 	public void setPauseOnExceptionWait(final long pauseOnExceptionWait) {
 		this.pauseOnExceptionWait = pauseOnExceptionWait;
 
+	}
+
+	@Override
+	public void start() {
+		Thread thread = Executors
+			.defaultThreadFactory()
+			.newThread(this);
+		thread.setDaemon(false);
+		thread.start();
+		running = true;
+	}
+
+	@Override
+	public void stop() {
+		running = false;
 	}
 }
