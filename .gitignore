@@ -6,3 +6,4 @@
 *.swp
 
 /.springBeans
+/activemq-data
