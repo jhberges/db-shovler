@@ -15,6 +15,7 @@ public class ShovlerBean {
 	private static final long DEFAULT_BATCH_SIZE = 200;
 	private static final long DEFAULT_RECEIVE_TIMEOUT = 200;
 	private static final Logger logger = LoggerFactory.getLogger(ShovlerBean.class);
+	public static final long PAUSE_ON_EXCEPTION = 5000;
 	private String destination;
 	private JmsTemplate jmsTemplate;
 	private JdbcTemplate jdbcTemplate;
@@ -33,7 +34,7 @@ public class ShovlerBean {
 		}
 	}
 
-	private void processInLoop() throws JMSException {
+	void processInLoop() throws JMSException {
 		jmsTemplate.setReceiveTimeout(receiveTimeout);
 		List<Message> receivedMessages = new ArrayList<Message>();
 		List<Object[]> batchArgs = new ArrayList<Object[]>();
@@ -47,7 +48,7 @@ public class ShovlerBean {
 				timedOut = true;
 			}
 		}
-		
+
 		int[] updated = jdbcTemplate.batchUpdate(batchStepMessageConverter.getSql(), batchArgs);
 		for (int i = 0; i < updated.length; i++) {
 			if (1 == updated[i]) {
@@ -58,7 +59,7 @@ public class ShovlerBean {
 		}
 	}
 
-	private void handleDidNotUpdateDatabase(final Message message) throws JMSException {
+	void handleDidNotUpdateDatabase(final Message message) throws JMSException {
 		logger.warn("Failed to update database for message: {}", message);
 		message.acknowledge();
 		if (null != deadLetterQueue) {
@@ -69,19 +70,19 @@ public class ShovlerBean {
 		}
 	}
 
-	private void pauseOnException(final JMSException jmsException) {
+	void pauseOnException(final JMSException jmsException) {
 		logger.warn("Exception when processing -- will pause a bit: " + jmsException.getMessage());
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(PAUSE_ON_EXCEPTION);
 		} catch (InterruptedException e) {
-			
+
 		}
 	}
 
 	public String getDestination() {
 		return destination;
 	}
-	
+
 	public void setDestination(final String destination) {
 		this.destination = destination;
 	}
