@@ -15,7 +15,7 @@ public class ShovlerBean {
 	private static final long DEFAULT_BATCH_SIZE = 200;
 	private static final long DEFAULT_RECEIVE_TIMEOUT = 200;
 	private static final Logger logger = LoggerFactory.getLogger(ShovlerBean.class);
-	public static final long PAUSE_ON_EXCEPTION = 5000;
+	public static final long DEFAULT_PAUSE_ON_EXCEPTION = 5000;
 	private String destination;
 	private JmsTemplate jmsTemplate;
 	private JdbcTemplate jdbcTemplate;
@@ -24,6 +24,7 @@ public class ShovlerBean {
 	private final boolean running = true;
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 	private String deadLetterQueue;
+	private long pauseOnExceptionWait = DEFAULT_PAUSE_ON_EXCEPTION;
 	public void process() {
 		while(running) {
 			try {
@@ -73,7 +74,7 @@ public class ShovlerBean {
 	void pauseOnException(final JMSException jmsException) {
 		logger.warn("Exception when processing -- will pause a bit: " + jmsException.getMessage());
 		try {
-			Thread.sleep(PAUSE_ON_EXCEPTION);
+			Thread.sleep(pauseOnExceptionWait);
 		} catch (InterruptedException e) {
 
 		}
@@ -135,5 +136,10 @@ public class ShovlerBean {
 	public void setBatchStepMessageConverter(
 			final PreparedStatementBatchStepMessageConverter batchStepMessageConverter) {
 		this.batchStepMessageConverter = batchStepMessageConverter;
+	}
+
+	public void setPauseOnExceptionWait(final long pauseOnExceptionWait) {
+		this.pauseOnExceptionWait = pauseOnExceptionWait;
+
 	}
 }
