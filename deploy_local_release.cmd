@@ -1,0 +1,1 @@
+@mvn -DaltDeploymentRepository=release-repo::default::file:../jhberges-mvn-repo/releases clean deploy
