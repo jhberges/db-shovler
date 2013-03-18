@@ -9,11 +9,11 @@ import javax.jms.Message;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.Lifecycle;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jms.core.JmsTemplate;
 
-public class ShovlerBean implements Lifecycle, Runnable {
+public class ShovlerBean implements InitializingBean, Runnable {
 	private static final long DEFAULT_BATCH_SIZE = 200;
 	private static final long DEFAULT_RECEIVE_TIMEOUT = 200;
 	private static final Logger logger = LoggerFactory.getLogger(ShovlerBean.class);
@@ -105,7 +105,6 @@ public class ShovlerBean implements Lifecycle, Runnable {
 		this.jmsTemplate = jmsTemplate;
 	}
 
-	@Override
 	public boolean isRunning() {
 		return running;
 	}
@@ -149,7 +148,7 @@ public class ShovlerBean implements Lifecycle, Runnable {
 	}
 
 	@Override
-	public void start() {
+	public void afterPropertiesSet() throws Exception {
 		logger.info("Starting");
 		Thread thread = Executors
 			.defaultThreadFactory()
@@ -157,10 +156,5 @@ public class ShovlerBean implements Lifecycle, Runnable {
 		thread.setDaemon(false);
 		thread.start();
 		running = true;
-	}
-
-	@Override
-	public void stop() {
-		running = false;
 	}
 }

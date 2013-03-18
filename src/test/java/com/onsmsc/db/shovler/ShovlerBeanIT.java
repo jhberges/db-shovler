@@ -6,9 +6,9 @@ import static org.junit.Assert.assertNotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jms.ConnectionFactory;
 import javax.sql.DataSource;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class ShovlerBeanIT {
 	private final Logger logger = LoggerFactory.getLogger(ShovlerBeanIT.class);
 	@Autowired
-	private ActiveMQConnectionFactory connectionFactory;
+	private ConnectionFactory connectionFactory;
 	@Autowired
 	private DataSource datasource;
 	@Test
@@ -37,7 +37,7 @@ public class ShovlerBeanIT {
 		logger.info("Sending message");
 		jmsTemplate.convertAndSend("SHOVLER_DESTINATION", map);
 		logger.info("Message sent!");
-		Thread.sleep(50000);
+		Thread.sleep(1000);
 
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
 		int count = jdbcTemplate.queryForInt("SELECT COUNT(*) FROM LOGGER WHERE MESSAGE_ID='MY_MESSAGE_ID'");
