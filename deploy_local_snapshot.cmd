@@ -1,0 +1,1 @@
+@mvn -DaltDeploymentRepository=snapshot-repo::default::file:../jhberges-mvn-repo/snapshots clean deploy
