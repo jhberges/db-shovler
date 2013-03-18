@@ -106,4 +106,10 @@
 		</snapshotRepository>
 	</distributionManagement>
 
+	<scm>
+		<url>scm:git:https://github.com/jhberges/db-shovler.git</url>
+		<connection>scm:git:https://github.com/jhberges/db-shovler.git</connection>
+		<developerConnection>scm:git:https://github.com/jhberges/db-shovler.git</developerConnection>
+	</scm>
+	<url>https://github.com/jhberges/db-shovler.git</url>
 </project>

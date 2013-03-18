@@ -37,7 +37,7 @@ public class ShovlerBeanTest {
 		long t0 = System.currentTimeMillis();
 		shovlerBean.pauseOnException(new JMSException("IRRELLEVANT_REASON"));
 		long diff = System.currentTimeMillis() - t0;
-		assertTrue("Expected > 200, was " + diff, 200 < diff);
+		assertTrue("Expected >= 200, was " + diff, 200 <= diff);
 	}
 	@Test
 	public void handleDidNotUpdateDatabaseWhenNoDlqAssigned() throws Exception {
