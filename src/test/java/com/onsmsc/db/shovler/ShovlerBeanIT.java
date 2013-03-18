@@ -11,6 +11,8 @@ import javax.sql.DataSource;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jms.core.JmsTemplate;
@@ -20,6 +22,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/integration/applicationContext.xml"})
 public class ShovlerBeanIT {
+	private final Logger logger = LoggerFactory.getLogger(ShovlerBeanIT.class);
 	@Autowired
 	private ActiveMQConnectionFactory connectionFactory;
 	@Autowired
@@ -31,7 +34,9 @@ public class ShovlerBeanIT {
 		Map<String, String> map = new HashMap <String, String>();
 		map.put("MESSAGE_ID", "MY_MESSAGE_ID");
 		map.put("PAYLOAD", "THE PAYLOAD");
+		logger.info("Sending message");
 		jmsTemplate.convertAndSend("SHOVLER_DESTINATION", map);
+		logger.info("Message sent!");
 		Thread.sleep(50000);
 
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);

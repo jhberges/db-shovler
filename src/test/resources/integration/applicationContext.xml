@@ -12,7 +12,8 @@
 	</jdbc:embedded-database>
 
 	<bean class="org.apache.activemq.ActiveMQConnectionFactory" id="connectionFactory">
-		<constructor-arg value="vm://localhost" />
+		<property name="brokerURL" value="vm://localhost" />
+		
 	</bean>
 	<bean class="org.springframework.jms.core.JmsTemplate" id="jmsTemplate">
 		<constructor-arg ref="connectionFactory" />

@@ -29,6 +29,7 @@ public class ShovlerBean implements Lifecycle, Runnable {
 	private long pauseOnExceptionWait = DEFAULT_PAUSE_ON_EXCEPTION;
 	@Override
 	public void run() {
+		logger.debug("Running");
 		while(running) {
 			try {
 				processInLoop();
@@ -149,6 +150,7 @@ public class ShovlerBean implements Lifecycle, Runnable {
 
 	@Override
 	public void start() {
+		logger.info("Starting");
 		Thread thread = Executors
 			.defaultThreadFactory()
 			.newThread(this);
