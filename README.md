@@ -8,14 +8,21 @@ The component is Spring based.
 Setup
 =====
 Add the maven repo:
-     https://github.com/jhberges/jhberges-mvn-repo/releases
+
+    https://github.com/jhberges/jhberges-mvn-repo/releases
      
 Add dependency to 
+
     groupId: com.onsmsc
     artifactId: db-shovler
-    version: 1.0.0
+    version: 1.0.1
     
 Add the ShovlerBean to your applicationContext as shown in the IT test.
+
+1.0.1
+=====
+* Setter for maxBatchSize
+* Oracle responses
 
 1.0.0
 =====
