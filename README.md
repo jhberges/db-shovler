@@ -5,6 +5,8 @@ This is an extract of running code, that performs batch inserts into databases b
 
 The component is Spring based.
 
+Donated by onSMSC Ltd and released under the Apache License 2.0.
+
 Setup
 =====
 Add the maven repo:
