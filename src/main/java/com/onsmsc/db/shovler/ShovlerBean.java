@@ -1,5 +1,6 @@
 package com.onsmsc.db.shovler;
 
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -22,7 +23,7 @@ public class ShovlerBean implements InitializingBean, Runnable {
 	private JmsTemplate jmsTemplate;
 	private JdbcTemplate jdbcTemplate;
 	private PreparedStatementBatchStepMessageConverter batchStepMessageConverter;
-	private final long maxBatchSize = DEFAULT_BATCH_SIZE;
+	private long maxBatchSize = DEFAULT_BATCH_SIZE;
 	private boolean running = false;
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 	private String deadLetterQueue;
@@ -56,12 +57,16 @@ public class ShovlerBean implements InitializingBean, Runnable {
 
 		int[] updated = jdbcTemplate.batchUpdate(batchStepMessageConverter.getSql(), batchArgs);
 		for (int i = 0; i < updated.length; i++) {
-			if (1 == updated[i]) {
+			if (successResponse(updated[i])) {
 				receivedMessages.get(i).acknowledge();
 			} else {
 				handleDidNotUpdateDatabase(receivedMessages.get(i));
 			}
 		}
+	}
+
+	private boolean successResponse(final int response) {
+		return -1 < response || response == Statement.SUCCESS_NO_INFO;
 	}
 
 	void handleDidNotUpdateDatabase(final Message message) throws JMSException {
@@ -96,6 +101,9 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		return maxBatchSize;
 	}
 
+	public void setMaxBatchSize(final long maxBatchSize) {
+		this.maxBatchSize = maxBatchSize;
+	}
 
 	public JmsTemplate getJmsTemplate() {
 		return jmsTemplate;
