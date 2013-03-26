@@ -4,8 +4,34 @@
 	<artifactId>db-shovler</artifactId>
 	<version>1.0.2-SNAPSHOT</version>
 	<name>db-shovler</name>
+	<url>https://github.com/jhberges/db-shovler.git</url>
+	<scm>
+		<url>scm:git:https://github.com/jhberges/db-shovler.git</url>
+		<connection>scm:git:https://github.com/jhberges/db-shovler.git</connection>
+		<developerConnection>scm:git:https://github.com/jhberges/db-shovler.git</developerConnection>
+	</scm>
+	<developers>
+		<developer>
+			<id>jhberges</id>
+			<email>jhberges at gmail.com</email>
+			<roles>
+				<role>Creator</role>
+				<role>Developer</role>
+			</roles>
+		</developer>
+	</developers>
+	<issueManagement>
+		<system>Github</system>
+		<url>https://github.com/jhberges/db-shovler/issues</url>
+	</issueManagement>
 	<properties>
 		<spring.version>3.2.0.RELEASE</spring.version>
+		<slf4j.version>1.7.2</slf4j.version>
+		<logback.version>1.0.9</logback.version>
+		<activemq.version>5.7.0</activemq.version>
+		<hsqldb.version>1.8.0.10</hsqldb.version>
+		<junit.version>4.11</junit.version>
+		<mockito.version>1.9.5</mockito.version>
 	</properties>
 	<build>
 		<plugins>
@@ -28,12 +54,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.2</version>
+			<version>${slf4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.0.9</version>
+			<version>${logback.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -66,31 +92,31 @@
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-all</artifactId>
-			<version>5.7.0</version>
+			<version>${activemq.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-pool</artifactId>
-			<version>5.7.0</version>
+			<version>${activemq.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>1.8.0.10</version>
+			<version>${hsqldb.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
+			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -105,10 +131,4 @@
 		</snapshotRepository>
 	</distributionManagement>
 
-	<scm>
-		<url>scm:git:https://github.com/jhberges/db-shovler.git</url>
-		<connection>scm:git:https://github.com/jhberges/db-shovler.git</connection>
-		<developerConnection>scm:git:https://github.com/jhberges/db-shovler.git</developerConnection>
-	</scm>
-	<url>https://github.com/jhberges/db-shovler.git</url>
 </project>
