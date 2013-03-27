@@ -1,5 +1,6 @@
 db-shovler
 ==========
+[![Build Status](https://travis-ci.org/jhberges/db-shovler)](https://travis-ci.org/jhberges/db-shovler)
 
 This is an extract of running code, that performs batch inserts into databases based on JMS messages of either explicit SQLs or prepared statements.
 
@@ -17,7 +18,7 @@ Add dependency to
 
     groupId: com.onsmsc
     artifactId: db-shovler
-    version: 1.0.1
+    version: 1.0.2
     
 Add the ShovlerBean to your applicationContext as shown in the IT test.
 
