@@ -21,6 +21,10 @@ Add dependency to
     
 Add the ShovlerBean to your applicationContext as shown in the IT test.
 
+1.0.2
+=====
+Available in Sonatype's OSS repository
+
 1.0.1
 =====
 * Setter for maxBatchSize
