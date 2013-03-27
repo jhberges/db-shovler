@@ -11,7 +11,7 @@
 	<name>db-shovler</name>
 	<url>https://github.com/jhberges/db-shovler.git</url>
 	<scm>
-		<url>https://github.com/jhberges/db-shovler.git</url>
+		<url>scm:git:https://github.com/jhberges/db-shovler.git</url>
 		<connection>scm:git:https://github.com/jhberges/db-shovler.git</connection>
 		<developerConnection>scm:git:https://github.com/jhberges/db-shovler.git</developerConnection>
 	</scm>
