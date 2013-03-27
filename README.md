@@ -1,6 +1,6 @@
 db-shovler
 ==========
-[![Build Status](https://travis-ci.org/jhberges/db-shovler)](https://travis-ci.org/jhberges/db-shovler)
+[![Build Status](https://travis-ci.org/jhberges/db-shovler.png)](https://travis-ci.org/jhberges/db-shovler)
 
 This is an extract of running code, that performs batch inserts into databases based on JMS messages of either explicit SQLs or prepared statements.
 
