@@ -18,7 +18,7 @@ Add dependency to
 
     groupId: com.onsmsc
     artifactId: db-shovler
-    version: 1.0.2
+    version: 1.0.5
     
 Add the ShovlerBean to your applicationContext as shown in the IT test.
 
