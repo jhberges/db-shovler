@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
 
 public class ShovlerBean implements InitializingBean, Runnable {
@@ -36,6 +37,8 @@ public class ShovlerBean implements InitializingBean, Runnable {
 				processInLoop();
 			} catch (JMSException jmsException) {
 				pauseOnException(jmsException);
+			} catch (JmsException springJmsException) {
+				pauseOnException(springJmsException);
 			}
 		}
 	}
@@ -80,7 +83,7 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		}
 	}
 
-	void pauseOnException(final JMSException jmsException) {
+	void pauseOnException(final Exception jmsException) {
 		logger.warn("Exception when processing -- will pause a bit: " + jmsException.getMessage());
 		try {
 			Thread.sleep(pauseOnExceptionWait);
