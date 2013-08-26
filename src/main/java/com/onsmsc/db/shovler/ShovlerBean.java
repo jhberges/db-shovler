@@ -11,6 +11,7 @@ import javax.jms.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
@@ -39,6 +40,8 @@ public class ShovlerBean implements InitializingBean, Runnable {
 				pauseOnException(jmsException);
 			} catch (JmsException springJmsException) {
 				pauseOnException(springJmsException);
+			} catch (TransientDataAccessException transientDataAccessException) {
+				pauseOnException(transientDataAccessException);
 			}
 		}
 	}
