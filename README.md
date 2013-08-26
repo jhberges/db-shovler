@@ -22,6 +22,10 @@ Add dependency to
     
 Add the ShovlerBean to your applicationContext as shown in the IT test.
 
+1.0.7
+=====
+Pause on TransientDataAccessException
+
 1.0.5
 =====
 Small fix to handle Spring's very own JmsException
