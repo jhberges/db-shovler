@@ -21,6 +21,9 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.Timer.Context;
+import com.codahale.metrics.health.HealthCheckRegistry;
+import com.onsmsc.db.shovler.metrics.DatasourceHealthCheck;
+import com.onsmsc.db.shovler.metrics.JmsHealthCheck;
 
 public class ShovlerBean implements InitializingBean, Runnable {
 	private static final long DEFAULT_BATCH_SIZE = 200;
@@ -42,6 +45,7 @@ public class ShovlerBean implements InitializingBean, Runnable {
 	private Timer batchTimer;
 	private Meter exceptionMeter;
 	private MetricRegistry metricRegistry;
+	private HealthCheckRegistry healthCheckRegistry;
 
 	@Override
 	public void run() {
@@ -211,6 +215,17 @@ public class ShovlerBean implements InitializingBean, Runnable {
 
 	public void setMetricRegistry(final MetricRegistry metricRegistry) {
 		this.metricRegistry = metricRegistry;
+	}
+
+	public HealthCheckRegistry getHealthCheckRegistry() {
+		return healthCheckRegistry;
+	}
+
+	public void setHealthCheckRegistry(final HealthCheckRegistry healthCheckRegistry) {
+		this.healthCheckRegistry = healthCheckRegistry;
+	}
+
+	private void initMetrics(final MetricRegistry metricRegistry) {
 		if (null != this.metricRegistry) {
 			messagesProcessed = metricRegistry.meter("processedMessages");
 			messagesFailed = metricRegistry.meter("failedMessages");
@@ -220,9 +235,18 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		}
 	}
 
+	private void initHealthChecks() {
+		if (null != this.healthCheckRegistry) {
+			this.healthCheckRegistry.register("database", new DatasourceHealthCheck(jdbcTemplate.getDataSource()));
+			this.healthCheckRegistry.register("broker", new JmsHealthCheck(jmsTemplate));
+		}
+	}
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		logger.info("Starting");
+		initMetrics(metricRegistry);
+		initHealthChecks();
 		Thread thread = Executors
 			.defaultThreadFactory()
 			.newThread(this);
