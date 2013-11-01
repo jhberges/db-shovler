@@ -17,6 +17,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.codahale.metrics.Timer.Context;
+
 public class ShovlerBean implements InitializingBean, Runnable {
 	private static final long DEFAULT_BATCH_SIZE = 200;
 	private static final long DEFAULT_RECEIVE_TIMEOUT = 200;
@@ -31,6 +36,13 @@ public class ShovlerBean implements InitializingBean, Runnable {
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 	private String deadLetterQueue;
 	private long pauseOnExceptionWait = DEFAULT_PAUSE_ON_EXCEPTION;
+	private Meter messagesProcessed;
+	private Meter messagesFailed;
+	private Meter dlqMessages;
+	private Timer batchTimer;
+	private Meter exceptionMeter;
+	private MetricRegistry metricRegistry;
+
 	@Override
 	public void run() {
 		logger.debug("Running");
@@ -38,8 +50,10 @@ public class ShovlerBean implements InitializingBean, Runnable {
 			try {
 				processInLoop();
 			} catch (JMSException jmsException) {
+				exceptionMeter.mark();
 				pauseOnException(jmsException);
 			} catch (JmsException springJmsException) {
+				exceptionMeter.mark();
 				pauseOnException(springJmsException);
 			}
 		}
@@ -60,12 +74,17 @@ public class ShovlerBean implements InitializingBean, Runnable {
 			}
 		}
 
+		Context context = batchTimer.time();
 		try {
 			int[] updated = jdbcTemplate.batchUpdate(batchStepMessageConverter.getSql(), batchArgs);
 			handleUpdateMisses(receivedMessages, updated);
+			context.stop();
 		} catch (DataAccessException e) {
+			context.stop();
+			exceptionMeter.mark();
 			handleDataAccessException(receivedMessages, batchArgs, e);
 		}
+		messagesProcessed.mark(batchArgs.size());
 	}
 
 	private void handleDataAccessException(
@@ -89,6 +108,7 @@ public class ShovlerBean implements InitializingBean, Runnable {
 			if (successResponse(updated[i])) {
 				receivedMessages.get(i).acknowledge();
 			} else {
+				this.messagesFailed.mark();
 				handleDidNotUpdateDatabase(receivedMessages.get(i));
 			}
 		}
@@ -103,6 +123,7 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		message.acknowledge();
 		if (null != deadLetterQueue) {
 			jmsTemplate.convertAndSend(deadLetterQueue, message);
+			dlqMessages.mark();
 			logger.info("Put on DLQ: {}", deadLetterQueue);
 		} else {
 			logger.warn("Message dropped");
@@ -182,6 +203,21 @@ public class ShovlerBean implements InitializingBean, Runnable {
 	public void setPauseOnExceptionWait(final long pauseOnExceptionWait) {
 		this.pauseOnExceptionWait = pauseOnExceptionWait;
 
+	}
+
+	public MetricRegistry getMetricRegistry() {
+		return metricRegistry;
+	}
+
+	public void setMetricRegistry(final MetricRegistry metricRegistry) {
+		this.metricRegistry = metricRegistry;
+		if (null != this.metricRegistry) {
+			messagesProcessed = metricRegistry.meter("processedMessages");
+			messagesFailed = metricRegistry.meter("failedMessages");
+			dlqMessages = metricRegistry.meter("dlqMessages");
+			batchTimer = metricRegistry.timer("batchExecutions");
+			exceptionMeter = metricRegistry.meter("exceptions");
+		}
 	}
 
 	@Override
