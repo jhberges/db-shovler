@@ -240,17 +240,23 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		this.healthCheckRegistry = healthCheckRegistry;
 	}
 
-	private void initMetrics(final MetricRegistry metricRegistry) {
+	void initMetrics() {
 		if (null != this.metricRegistry) {
 			messagesProcessed = metricRegistry.meter("processedMessages");
 			messagesFailed = metricRegistry.meter("failedMessages");
 			dlqMessages = metricRegistry.meter("dlqMessages");
 			batchTimer = metricRegistry.timer("batchExecutions");
 			exceptionMeter = metricRegistry.meter("exceptions");
+		} else {
+			messagesProcessed = new Meter();
+			messagesFailed = new Meter();
+			dlqMessages = new Meter();
+			batchTimer = new Timer();
+			exceptionMeter = new Meter();
 		}
 	}
 
-	private void initHealthChecks() {
+	void initHealthChecks() {
 		if (null != this.healthCheckRegistry) {
 			this.healthCheckRegistry.register("database", new DatasourceHealthCheck(jdbcTemplate.getDataSource()));
 			this.healthCheckRegistry.register("broker", new JmsHealthCheck(jmsTemplate));
@@ -260,7 +266,7 @@ public class ShovlerBean implements InitializingBean, Runnable {
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		logger.info("Starting");
-		initMetrics(metricRegistry);
+		initMetrics();
 		initHealthChecks();
 		Thread thread = Executors
 			.defaultThreadFactory()

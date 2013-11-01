@@ -9,6 +9,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -18,21 +19,35 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jms.core.JmsTemplate;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.health.HealthCheckRegistry;
+
 @RunWith(MockitoJUnitRunner.class)
 public class ShovlerBeanTest {
 	@Mock
 	private JmsTemplate jmsTemplate;
 	@Mock
 	private JdbcTemplate jdbcTemplate;
+	@Mock
+	private MetricRegistry metricRegistry;
+	@Mock
+	private HealthCheckRegistry healthCheckRegistry;
 	@InjectMocks
 	private ShovlerBean shovlerBean;
 	@Mock
 	private Message message;
 	@Mock
 	private PreparedStatementBatchStepMessageConverter batchStepMessageConverter;
+
+	@Before
+	public void before() throws Exception {
+		shovlerBean.setMetricRegistry(null);
+		shovlerBean.initMetrics();
+	}
+
 	@After
 	public void after() throws Exception {
-		Mockito.verifyNoMoreInteractions(message);
+		Mockito.verifyNoMoreInteractions(message, metricRegistry, healthCheckRegistry);
 	}
 	@Test
 	public void pauseOnException() throws Exception {
@@ -94,5 +109,13 @@ public class ShovlerBeanTest {
 	@Test
 	public void successResponseWhenOneRowUdated() throws Exception {
 		assertTrue(ShovlerBean.successResponse(1));
+	}
+
+	@Test
+	public void setMetricRegistry() {
+		shovlerBean.setMetricRegistry(metricRegistry);
+		shovlerBean.initMetrics();
+		Mockito.verify(metricRegistry, Mockito.times(4)).meter(Mockito.anyString());
+		Mockito.verify(metricRegistry, Mockito.times(1)).timer(Mockito.anyString());
 	}
 }
