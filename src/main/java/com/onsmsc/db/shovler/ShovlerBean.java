@@ -34,7 +34,7 @@ public class ShovlerBean implements InitializingBean, Runnable {
 	private JmsTemplate jmsTemplate;
 	private JdbcTemplate jdbcTemplate;
 	private PreparedStatementBatchStepMessageConverter batchStepMessageConverter;
-	private long maxBatchSize = DEFAULT_BATCH_SIZE;
+	private final long maxBatchSize = DEFAULT_BATCH_SIZE;
 	private boolean running = false;
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 	private String deadLetterQueue;
@@ -147,6 +147,10 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		return destination;
 	}
 
+	/**
+	 * The source destination. I.e the queue/topic to consume from.
+	 * @param destination
+	 */
 	public void setDestination(final String destination) {
 		this.destination = destination;
 	}
@@ -155,14 +159,10 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		return maxBatchSize;
 	}
 
-	public void setMaxBatchSize(final long maxBatchSize) {
-		this.maxBatchSize = maxBatchSize;
-	}
-
-	public JmsTemplate getJmsTemplate() {
-		return jmsTemplate;
-	}
-
+	/**
+	 * Size of JDBC batches.
+	 * @param jmsTemplate
+	 */
 	public void setJmsTemplate(final JmsTemplate jmsTemplate) {
 		this.jmsTemplate = jmsTemplate;
 	}
@@ -175,6 +175,10 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		return receiveTimeout;
 	}
 
+	/**
+	 * "receive()" timeout in milliseconds for the JMS consumer.
+	 * @param receiveTimeout
+	 */
 	public void setReceiveTimeout(final long receiveTimeout) {
 		this.receiveTimeout = receiveTimeout;
 	}
@@ -191,6 +195,9 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		return deadLetterQueue;
 	}
 
+	/**
+	 * (Optional) DLQ destination for messages that aren't processable.
+	 */
 	public void setDeadLetterQueue(final String deadLetterQueue) {
 		this.deadLetterQueue = deadLetterQueue;
 	}
@@ -213,6 +220,10 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		return metricRegistry;
 	}
 
+	/**
+	 * Provide metrics for throughput in a Codahale MetricRegistry.
+	 * For details see {@link #initMetrics(MetricRegistry)}
+	 */
 	public void setMetricRegistry(final MetricRegistry metricRegistry) {
 		this.metricRegistry = metricRegistry;
 	}
@@ -221,6 +232,10 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		return healthCheckRegistry;
 	}
 
+	/**
+	 * Provide health checks for JMS and JDBC in a Codahale HealthCheckRegistry.
+	 * For details see {@link #initHealthChecks()}
+	 */
 	public void setHealthCheckRegistry(final HealthCheckRegistry healthCheckRegistry) {
 		this.healthCheckRegistry = healthCheckRegistry;
 	}
