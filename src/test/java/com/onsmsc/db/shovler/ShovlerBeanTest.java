@@ -1,6 +1,9 @@
 package com.onsmsc.db.shovler;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.sql.Statement;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -76,5 +79,20 @@ public class ShovlerBeanTest {
 		Mockito.verify(message).acknowledge();
 
 		Mockito.verifyNoMoreInteractions(jmsTemplate, jdbcTemplate, batchStepMessageConverter);
+	}
+
+	@Test
+	public void successResponseWhenNegative() throws Exception {
+		assertFalse(ShovlerBean.successResponse(-1));
+	}
+
+	@Test
+	public void successResponseWhenNO_INFO() throws Exception {
+		assertTrue(ShovlerBean.successResponse(Statement.SUCCESS_NO_INFO));
+	}
+
+	@Test
+	public void successResponseWhenOneRowUdated() throws Exception {
+		assertTrue(ShovlerBean.successResponse(1));
 	}
 }

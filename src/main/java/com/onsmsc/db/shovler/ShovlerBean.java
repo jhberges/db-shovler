@@ -1,5 +1,6 @@
 package com.onsmsc.db.shovler;
 
+import java.sql.BatchUpdateException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import javax.jms.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.TransientDataAccessException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
@@ -40,8 +41,6 @@ public class ShovlerBean implements InitializingBean, Runnable {
 				pauseOnException(jmsException);
 			} catch (JmsException springJmsException) {
 				pauseOnException(springJmsException);
-			} catch (TransientDataAccessException transientDataAccessException) {
-				pauseOnException(transientDataAccessException);
 			}
 		}
 	}
@@ -61,7 +60,31 @@ public class ShovlerBean implements InitializingBean, Runnable {
 			}
 		}
 
-		int[] updated = jdbcTemplate.batchUpdate(batchStepMessageConverter.getSql(), batchArgs);
+		try {
+			int[] updated = jdbcTemplate.batchUpdate(batchStepMessageConverter.getSql(), batchArgs);
+			handleUpdateMisses(receivedMessages, updated);
+		} catch (DataAccessException e) {
+			handleDataAccessException(receivedMessages, batchArgs, e);
+		}
+	}
+
+	private void handleDataAccessException(
+			final List<Message> receivedMessages,
+			final List<Object[]> batchArgs,
+			final DataAccessException dataAccessException)
+			throws JMSException {
+		if (dataAccessException.getRootCause() instanceof BatchUpdateException){
+			BatchUpdateException batchUpdateException = (BatchUpdateException) dataAccessException.getRootCause();
+			int[] updates = batchUpdateException.getUpdateCounts();
+			handleUpdateMisses(receivedMessages, updates);
+		} else {
+			logger.error("Failed to handle {} messages due to exception {} -- will add to DLQ", batchArgs.size(), dataAccessException.getMessage());
+			pauseOnException(dataAccessException);
+		}
+	}
+
+	private void handleUpdateMisses(List<Message> receivedMessages,
+			int[] updated) throws JMSException {
 		for (int i = 0; i < updated.length; i++) {
 			if (successResponse(updated[i])) {
 				receivedMessages.get(i).acknowledge();
@@ -71,7 +94,7 @@ public class ShovlerBean implements InitializingBean, Runnable {
 		}
 	}
 
-	private boolean successResponse(final int response) {
+	static boolean successResponse(final int response) {
 		return -1 < response || response == Statement.SUCCESS_NO_INFO;
 	}
 
