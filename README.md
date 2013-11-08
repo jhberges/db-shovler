@@ -18,9 +18,17 @@ Add dependency to
 
     groupId: com.onsmsc
     artifactId: db-shovler
-    version: 1.0.5
+    version: 1.0.10
     
 Add the ShovlerBean to your applicationContext as shown in the IT test.
+
+1.0.10-SNAPSHOT
+===============
+Return of the disappearing setMaxBatchSize()
+
+1.0.8
+=====
+Stability - handle all DataAccessExceptions
 
 1.0.7
 =====
