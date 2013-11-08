@@ -34,7 +34,7 @@ public class ShovlerBean implements InitializingBean, Runnable {
 	private JmsTemplate jmsTemplate;
 	private JdbcTemplate jdbcTemplate;
 	private PreparedStatementBatchStepMessageConverter batchStepMessageConverter;
-	private final long maxBatchSize = DEFAULT_BATCH_SIZE;
+	private long maxBatchSize = DEFAULT_BATCH_SIZE;
 	private boolean running = false;
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 	private String deadLetterQueue;
@@ -157,6 +157,10 @@ public class ShovlerBean implements InitializingBean, Runnable {
 
 	public long getMaxBatchSize() {
 		return maxBatchSize;
+	}
+
+	public void setMaxBatchSize(final long maxBatchSize) {
+		this.maxBatchSize = maxBatchSize;
 	}
 
 	/**
