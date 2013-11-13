@@ -22,7 +22,7 @@ Add dependency to
     
 Add the ShovlerBean to your applicationContext as shown in the IT test.
 
-1.0.10-SNAPSHOT
+1.0.10
 ===============
 Return of the disappearing setMaxBatchSize()
 
