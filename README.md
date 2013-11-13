@@ -10,10 +10,6 @@ Donated by onSMSC Ltd and released under the Apache License 2.0.
 
 Setup
 =====
-Add the maven repo:
-
-    https://github.com/jhberges/jhberges-mvn-repo/releases
-     
 Add dependency to 
 
     groupId: com.onsmsc
